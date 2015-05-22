@@ -11,7 +11,7 @@ After troubleshooting remember to revert the changes made to the config file and
 
 #### On a Linux Machine
 ```
-curl -O https://raw.githubusercontent.com/kizbitz/dsinfo/master/dsinfo.sh
+curl -O https://raw.githubusercontent.com/dockersupport/dsinfo/master/dsinfo.sh
 chmod +x dsinfo.sh
 sudo ./dsinfo.sh
 ```
@@ -19,7 +19,7 @@ sudo ./dsinfo.sh
 or
 
 ```
-wget https://raw.githubusercontent.com/kizbitz/dsinfo/master/dsinfo.sh
+wget https://raw.githubusercontent.com/dockersupport/dsinfo/master/dsinfo.sh
 chmod +x dsinfo.sh
 sudo ./dsinfo.sh
 ```
