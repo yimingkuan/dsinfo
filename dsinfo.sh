@@ -135,8 +135,8 @@ if [ -d ${TD} ]; then
 fi
 
 # tmp directories
-mkdir -p ${TD}/dhe/generatedConfigs
-mkdir -p ${TD}/dhe/logs
+mkdir -p ${TD}/dtr/generatedConfigs
+mkdir -p ${TD}/dtr/logs
 mkdir -p ${TD}/inspect
 mkdir -p ${TD}/logs
 
@@ -197,24 +197,24 @@ for container in $(docker ps -a -n 20 -q); do
   docker inspect ${container} >> ${TD}/inspect/${container}.txt
 done
 
-# dhe
+# dtr
 # ~~~
-DHE=/usr/local/etc/dhe
+DHE=/usr/local/etc/dtr
 if [ -d ${DHE} ]; then
-  cp ${DHE}/*.yml ${TD}/dhe
-  cp ${DHE}/generatedConfigs/*.conf ${TD}/dhe/generatedConfigs
-  cp ${DHE}/generatedConfigs/*.yml ${TD}/dhe/generatedConfigs
+  cp ${DHE}/*.yml ${TD}/dtr
+  cp ${DHE}/generatedConfigs/*.conf ${TD}/dtr/generatedConfigs
+  cp ${DHE}/generatedConfigs/*.yml ${TD}/dtr/generatedConfigs
 
   for log in ${DHE}/logs/*
   do
     logbase=$(basename ${log})
-    tail -n ${LOGLINES} ${log} > ${TD}/dhe/logs/${logbase}.log
+    tail -n ${LOGLINES} ${log} > ${TD}/dtr/logs/${logbase}.log
   done
 else
   bline
-  header 'Docker Hub Enterprise'
+  header 'Docker Trusted Registry'
   bline
-  echo "The '/usr/local/etc/dhe' directory does not exist." >> ${TR}
+  echo "The '/usr/local/etc/dtr' directory does not exist." >> ${TR}
 fi
 
 # system
@@ -252,9 +252,9 @@ Notes
 
 This script created the directories:
   - /tmp/dsinfo
-  - /tmp/dsinfo/dhe
-  - /tmp/dsinfo/dhe/generatedConfigs
-  - /tmp/dsinfo/dhe/logs
+  - /tmp/dsinfo/dtr
+  - /tmp/dsinfo/dtr/generatedConfigs
+  - /tmp/dsinfo/dtr/logs
   - /tmp/dsinfo/inspect
   - /tmp/dsinfo/logs
 
