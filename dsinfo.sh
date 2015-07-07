@@ -199,13 +199,13 @@ done
 
 # dtr
 # ~~~
-DHE=/usr/local/etc/dtr
-if [ -d ${DHE} ]; then
-  cp ${DHE}/*.yml ${TD}/dtr
-  cp ${DHE}/generatedConfigs/*.conf ${TD}/dtr/generatedConfigs
-  cp ${DHE}/generatedConfigs/*.yml ${TD}/dtr/generatedConfigs
+DTR=/usr/local/etc/dtr
+if [ -d ${DTR} ]; then
+  cp ${DTR}/*.yml ${TD}/dtr
+  cp ${DTR}/generatedConfigs/*.conf ${TD}/dtr/generatedConfigs
+  cp ${DTR}/generatedConfigs/*.yml ${TD}/dtr/generatedConfigs
 
-  for log in ${DHE}/logs/*
+  for log in ${DTR}/logs/*
   do
     logbase=$(basename ${log})
     tail -n ${LOGLINES} ${log} > ${TD}/dtr/logs/${logbase}.log
