@@ -9,12 +9,40 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
-# working directory
-TD=/tmp/dsinfo
-TR=$TD/dsinfo.txt
+while getopts ":t:o:l:b" opt; do
+  case $opt in
+    b)
+      BATCH=true
+      ;;
+    t)
+      TD="$OPTARG"
+      ;;
+    o)
+      TARFILE="$OPTARG"
+      ;;
+    l)
+      LOGLINES="OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument" >&2
+      exit 1;
+      ;;
+  esac
+done
+
+BATCH=${BATCH:-false}
+
+# temp directory
+TD="${TD:-/tmp/dsinfo}"
+TR="$TD/dsinfo.txt"
+TARFILE="${TARFILE:-/tmp/dsinfo.tar.gz}"
 
 # number of log lines to collect
-LOGLINES=5000
+LOGLINES="${LOGLINES:-5000}"
 
 # OS
 OSNAME=$(cat /etc/*release | grep "^NAME" | cut -d'"' -f2)
@@ -71,64 +99,66 @@ set_dopts() {
 }
 
 
-# begin
-echo
-echo "*************************** dsinfo.sh ***************************"
-echo
-echo "Beginning data collection ..."
-echo
-
-# check debug
-# Note: Boot2Docker has debug enabled by default.
-dbug=$(docker info | grep "Debug mode (server)" | grep -o "true")
-
-if [ "${dbug}" != "true" ]; then
+if [ $BATCH != true ]; then
+  # begin
   echo
-  echo "The Docker daemon is not running with debug logging enabled!"
-  echo ""
-  read -p "Enable debug logging and restart the Docker daemon? [y/n]: " answer
-  case ${answer} in
+  echo "*************************** dsinfo.sh ***************************"
+  echo
+  echo "Beginning data collection ..."
+  echo
 
-    [yY] | [yY][Ee][Ss] )
-      case ${OSNAME} in
-        "CentOS Linux")
-          set_opts '/etc/sysconfig/docker'
-          systemctl restart docker
-          ;;
-        "Debian GNU/Linux")
-          set_dopts '/etc/default/docker'
-          service docker restart
-          ;;
-        "NAME=Fedora")
-          set_opts '/etc/sysconfig/docker'
-          systemctl restart docker
-          ;;
-        "Red Hat Enterprise Linux Server")
-          set_opts '/etc/sysconfig/docker'
-          systemctl restart docker
-          ;;
-        "Ubuntu")
-          set_dopts '/etc/default/docker'
-          service docker restart
-          ;;
-        *)
-          echo
-          echo "Can't determine the location of the Docker config file."
-          echo "Enable debug logging manually and restart the Docker daemon"
-          exit 1
-          ;;
-      esac
+  # check debug
+  # Note: Boot2Docker has debug enabled by default.
+  dbug=$(docker info | grep "Debug mode (server)" | grep -o "true")
 
-      echo
-      echo "Debug logging enabled and daemon restarted."
-      echo "Run the 'dsinf.sh' data collection script again when you're ready ..."
-      exit 1
-      ;;
-    *)
-      echo
-      echo "Continuing without enabling debug logging ..."
-      ;;
-  esac
+  if [ "${dbug}" != "true" ]; then
+    echo
+    echo "The Docker daemon is not running with debug logging enabled!"
+    echo ""
+    read -p "Enable debug logging and restart the Docker daemon? [y/n]: " answer
+    case ${answer} in
+
+      [yY] | [yY][Ee][Ss] )
+        case ${OSNAME} in
+          "CentOS Linux")
+            set_opts '/etc/sysconfig/docker'
+            systemctl restart docker
+            ;;
+          "Debian GNU/Linux")
+            set_dopts '/etc/default/docker'
+            service docker restart
+            ;;
+          "NAME=Fedora")
+            set_opts '/etc/sysconfig/docker'
+            systemctl restart docker
+            ;;
+          "Red Hat Enterprise Linux Server")
+            set_opts '/etc/sysconfig/docker'
+            systemctl restart docker
+            ;;
+          "Ubuntu")
+            set_dopts '/etc/default/docker'
+            service docker restart
+            ;;
+          *)
+            echo
+            echo "Can't determine the location of the Docker config file."
+            echo "Enable debug logging manually and restart the Docker daemon"
+            exit 1
+            ;;
+        esac
+
+        echo
+        echo "Debug logging enabled and daemon restarted."
+        echo "Run the 'dsinf.sh' data collection script again when you're ready ..."
+        exit 1
+        ;;
+      *)
+        echo
+        echo "Continuing without enabling debug logging ..."
+        ;;
+    esac
+  fi
 fi
 if [ -d ${TD} ]; then
   rm -r ${TD}*
@@ -156,7 +186,11 @@ execute 'docker info'
 execute 'docker images --no-trunc'
 execute 'docker ps -a -n 20 --no-trunc'
 
-if command -v bash >/dev/null 2>&1; then
+# XXX(pdev) - we should probably avoid running curl to get additional scripts
+#             since it won't work in airgapped scenarios
+if [ -x /check-config.sh ]; then
+  execute '/check-config.sh'
+elif command -v bash >/dev/null 2>&1; then
   bline
   echo "check-config.sh" >> ${TR}
   echo "~~~~~~~~~~~~~~~" >> ${TR}
@@ -240,11 +274,12 @@ execute 'sestatus'
 execute 'dmidecode'
 
 # tar
-cd /tmp
-tar -zcf /tmp/dsinfo.tar.gz dsinfo
+BASEDIR=`basename $TD`
+cd "${TD}/.." && tar -zcf $TARFILE $BASEDIR
 
-# instructions
-echo "
+if [ $BATCH = false ]; then
+  # instructions
+  echo <<EOF
 Data collection complete ...
 
 Notes
@@ -275,4 +310,7 @@ private information and edit/delete if necessary.
 If you do edit/remove any files, recreate the tar file with the following command:
 
   sudo tar -zcf /tmp/dsinfo.tar.gz /tmp/dsinfo
-"
+EOF
+else
+  base64 -w 0 /tmp/dsinfo.tar.gz
+fi

@@ -1,0 +1,16 @@
+FROM ubuntu:14.04
+
+RUN apt-get update && apt-get install -y curl
+
+ADD https://get.docker.com/builds/Linux/x86_64/docker-1.7.0 /usr/local/bin/docker
+RUN chmod +x /usr/local/bin/docker
+
+ADD https://raw.githubusercontent.com/docker/docker/master/contrib/check-config.sh /check-config.sh
+RUN chmod +x /check-config.sh
+
+ADD dsinfo.sh /dsinfo.sh
+RUN chmod +x /dsinfo.sh
+
+ENV TAG latest
+
+CMD /dsinfo.sh -b 2>/dev/null
