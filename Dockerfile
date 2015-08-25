@@ -1,7 +1,5 @@
 FROM alpine:3.2
 
-RUN apk update && apk add curl
-
 ADD https://get.docker.com/builds/Linux/x86_64/docker-1.7.0 /usr/local/bin/docker
 RUN chmod +x /usr/local/bin/docker
 
