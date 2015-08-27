@@ -312,8 +312,5 @@ If you do edit/remove any files, recreate the tar file with the following comman
   sudo tar -zcf /tmp/dsinfo.tar.gz /tmp/dsinfo
 EOF
 else
-  # XXX(pdev) base64 in alpine linux doesn't have a pad setting, so
-  #           instead we wrap in uuencode
-  uuencode /tmp/dsinfo.tar.gz /tmp/dsinfo.uu
-  cat /tmp/dsinfo.uu
+  base64 /tmp/dsinfo.tar.gz
 fi
