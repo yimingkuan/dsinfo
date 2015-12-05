@@ -259,7 +259,11 @@ header 'System Info'
 bline
 
 execute 'hostname'
-execute 'cat /etc/*release'
+if [ $BATCH = false ]; then
+  execute 'cat /etc/*release'
+else
+  execute 'cat /etc_host/*release'
+fi
 execute 'cat /proc/version'
 execute 'cat /proc/cpuinfo'
 execute 'cat /proc/meminfo'
@@ -267,11 +271,16 @@ execute 'cat /proc/cgroups'
 execute 'cat /proc/self/cgroup'
 execute 'df -h'
 execute 'mount'
-execute 'ifconfig'
-execute 'ps aux | grep docker'
-execute 'netstat -npl'
-execute 'sestatus'
+if [ $BATCH = false ]; then
+  execute 'ifconfig'
+  execute 'ps aux | grep docker'
+  execute 'netstat -npl'
+  execute 'sestatus'
+fi
+execute 'vmstat 1 5'
+execute 'iostat 1 5'
 execute 'dmidecode'
+
 
 # tar
 BASEDIR=`basename $TD`
