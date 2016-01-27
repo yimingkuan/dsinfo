@@ -229,7 +229,7 @@ case ${OSNAME} in
     cp /etc/default/docker ${TD}/docker.cfg
     ;;
   "openSUSE Leap")
-    tail -n ${LOGLINES} /var/log/messages | grep docker > ${TD}/daemon.log
+    journalctl -n ${LOGLINES} -u docker.service > ${TD}/daemon.log
     cp /etc/sysconfig/docker ${TD}/docker.cfg
     ;;
 esac
