@@ -140,6 +140,10 @@ if [ $BATCH != true ]; then
             set_dopts '/etc/default/docker'
             service docker restart
             ;;
+          "openSUSE Leap")
+            set_opts '/etc/sysconfig/docker'
+            systemctl restart docker
+            ;;
           *)
             echo
             echo "Can't determine the location of the Docker config file."
@@ -222,6 +226,10 @@ case ${OSNAME} in
   "Ubuntu")
     tail -n ${LOGLINES} /var/log/upstart/docker.log > ${TD}/daemon.log
     cp /etc/default/docker ${TD}/docker.cfg
+    ;;
+  "openSUSE Leap")
+    tail -n ${LOGLINES} /var/log/messages | grep docker > ${TD}/daemon.log
+    cp /etc/sysconfig/docker ${TD}/docker.cfg
     ;;
 esac
 
