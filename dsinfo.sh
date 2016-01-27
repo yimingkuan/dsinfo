@@ -79,6 +79,7 @@ execute() {
 
 set_opts() {
   dopts=$(cat $* | grep "^OPTIONS")
+  echo "${dopts}"
 
   if [ -z "${dopts}" ]; then
     echo "OPTIONS='-D'" >> $*
